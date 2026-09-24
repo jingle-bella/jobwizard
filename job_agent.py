@@ -190,7 +190,7 @@ def send_email(subject: str, body_html: str) -> bool:
     pwd = os.environ.get("GMAIL_APP_PASSWORD")
     if not (user and pwd):
         return False
-    to = os.environ.get("DIGEST_TO) or user
+    to = os.environ.get("DIGEST_TO") or user
     msg = MIMEText(body_html, "html")
     msg["Subject"], msg["From"], msg["To"] = subject, user, to
     with smtplib.SMTP_SSL("smtp.gmail.com", 465) as s:
