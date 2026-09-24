@@ -1,0 +1,57 @@
+# How far back to look for new postings (hours). 26 gives a little overlap
+# so nothing slips through if the cron runs late; seen_jobs.json prevents dupes.
+window_hours: 26
+
+# Board slugs: the part of the public job-board URL after the domain.
+#   Greenhouse: boards.greenhouse.io/<slug>   or job-boards.greenhouse.io/<slug>
+#   Lever:      jobs.lever.co/<slug>
+#   Ashby:      jobs.ashbyhq.com/<slug>
+# Verify each by opening the URL in a browser. A wrong slug won't crash the run;
+# it just shows up under "Fetch errors" in the digest.
+companies:
+  greenhouse:
+    - anthropic
+    - databricks
+    - scaleai
+  lever:
+    - mistral
+    - palantir
+  ashby:
+    - openai
+    - cohere
+
+filters:
+  # A job must match at least one of these in its title (case-insensitive).
+  title_include:
+    - machine learning
+    - ml engineer
+    - mlops
+    - ai engineer
+    - applied scientist
+    - llm
+    - data scientist
+  # Drop a job if its title contains any of these.
+  title_exclude:
+    - intern
+    - principal
+    - director
+    - manager
+    - staff
+  # Keep a job if its location contains any of these. Empty list = keep all.
+  location_include:
+    - remote
+    - philadelphia
+    - new york
+    - united states
+    - usa
+
+# Used only when ANTHROPIC_API_KEY is set. Edit freely.
+scoring:
+  model: claude-haiku-4-5-20251001
+  max_jobs_to_score: 40
+  profile: |
+    Data/ML practitioner transitioning into AI engineering / MLOps.
+    Experience: NLP research (UPenn), data science (CDC), consulting (Avanade, PwC),
+    behavioral health data systems. Strong in Python, SQL, R, BI dashboards,
+    data pipelines, R package development; building an LLM-based app as founding engineer.
+    Looking for AI engineer, ML engineer, MLOps, applied LLM roles, mid-level.
