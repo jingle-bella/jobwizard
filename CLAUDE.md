@@ -29,6 +29,14 @@ Logged-in sites (LinkedIn) and automated logins: not decided yet — don't add u
   (`career_url, ats, slug, status, checked_at, notes`) are filled by later stages or by hand.
 - `tools/import_sponsors.py` — raw → `data/companies.csv`. Idempotent: keeps derived columns by employer.
   Not yet used by `job_agent.py` (planned: detect stage → fetch deduped by `(ats, slug)`).
+- `tools/detect_ats.py` — stage 1: homepage → careers link → ATS fingerprints → writes derived columns
+  (status: ok / unsupported / empty / not_found / blocked / error; never touches `manual` rows).
+  **`find_fingerprints()` and `decide()` are the owner's to write** (learning project) — don't fill them in;
+  review and give hints instead. Spec is in their docstrings + `tests/test_detect_ats.py`.
+  Dry run on the 52 `high` sites with a reference solution: ok 5, unsupported 17 (Workday 7, iCIMS 5),
+  not_found 20 (mostly custom/JS-rendered sites, e.g. Microsoft, Meta), blocked 9, error 1.
+- `tests/` — pytest. Local env: `python3 -m venv .venv && .venv/bin/pip install -r requirements-dev.txt`,
+  then `.venv/bin/pytest -v`.
 - `seen_jobs.json` — dedupe state (`job_id -> first_seen ISO timestamp`), pruned after 90 days
   (`SEEN_RETENTION_DAYS`). Written by CI; do not hand-edit.
 - `requirements.txt` (`requests`, `PyYAML`), `README.md` (human setup guide).
