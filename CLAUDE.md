@@ -2,15 +2,17 @@
 
 ## What this is
 A personal automation that emails a daily digest of newly posted AI/ML job openings.
+Goal: find the best-fit jobs fast for an owner who needs US visa sponsorship (H-1B).
 It runs on GitHub Actions (cron), pulls postings from **public** ATS job-board APIs
-(Greenhouse, Lever, Ashby — no login, no scraping), filters by title/location keywords,
+(Greenhouse, Lever, Ashby), filters by title/location keywords,
 optionally scores fit with Claude, and sends an HTML email via Gmail SMTP.
 
 Repo: `jingle-bella/jobwizard` (private). The project lives at the repo root.
 
-Hard constraint: **never** add LinkedIn (or any logged-in site) scraping or automated
-logins. It violates ToS and risks the owner's account during an active job search.
-New sources must be public APIs/feeds.
+Sources: scraping public (no-login) company career sites is allowed (owner decision, 2026-09-28).
+Prefer the most structured layer: ATS API > platform JSON (e.g. Workday) > schema.org
+`JobPosting` JSON-LD > HTML parsing. Be polite: rate-limit per host, honest User-Agent.
+Logged-in sites (LinkedIn) and automated logins: not decided yet — don't add until the owner decides.
 
 ## Files
 - `job_agent.py` — the whole pipeline (~250 lines, single file, stdlib + requests + PyYAML).
@@ -20,6 +22,13 @@ New sources must be public APIs/feeds.
   `actions/setup-python@v7` (Node 24); runs the script on `ubuntu-latest` / Python 3.12, then commits
   `seen_jobs.json` back to `main` as `job-agent-bot` (message has `[skip ci]`; commits only if changed;
   `git pull --rebase` before push so a concurrent push to `main` doesn't fail the run).
+- `data/raw/h1b_sponsor_company_49cities.csv` — owner's H-1B sponsor list (555 employers, FY2025 LCA,
+  Chinese headers, homepage URLs not career pages, 43 are `未确认`). Immutable: never edit by hand.
+- `data/companies.csv` — normalized sponsor DB, one row per LCA employer (legal entity; several can
+  share one career site, e.g. 3× Deloitte). The source of truth after import. Derived columns
+  (`career_url, ats, slug, status, checked_at, notes`) are filled by later stages or by hand.
+- `tools/import_sponsors.py` — raw → `data/companies.csv`. Idempotent: keeps derived columns by employer.
+  Not yet used by `job_agent.py` (planned: detect stage → fetch deduped by `(ats, slug)`).
 - `seen_jobs.json` — dedupe state (`job_id -> first_seen ISO timestamp`), pruned after 90 days
   (`SEEN_RETENTION_DAYS`). Written by CI; do not hand-edit.
 - `requirements.txt` (`requests`, `PyYAML`), `README.md` (human setup guide).
