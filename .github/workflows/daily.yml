@@ -2,18 +2,18 @@ name: daily-job-digest
 
 on:
   schedule:
-    - cron: "0 11 * * *"   # 11:00 UTC = 7am ET in summer, 6am ET in winter
-  workflow_dispatch:
+    - cron: "0 9 * * *"     # 09:00 UTC = 5am ET in summer, 4am ET in winter
+  workflow_dispatch:        # lets you trigger a run manually from the Actions tab
 
 permissions:
-  contents: write
+  contents: write           # needed to commit seen_jobs.json back to the repo
 
 jobs:
   run:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
       - run: pip install -r requirements.txt
@@ -30,4 +30,5 @@ jobs:
           git config user.email "actions@users.noreply.github.com"
           git add seen_jobs.json
           git diff --cached --quiet || git commit -m "chore: update seen jobs [skip ci]"
+          git pull --rebase     # in case main moved while the agent was running
           git push
